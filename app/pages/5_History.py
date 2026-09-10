@@ -1,6 +1,29 @@
 import streamlit as st
 import pandas as pd
 
+from styles import load_css
+
+st.set_page_config(
+    page_title="Analysis History",
+    page_icon="📚",
+    layout="wide",
+)
+
+load_css()
+
+st.markdown(
+    """
+<div class="page-hero">
+<div class="page-hero-tag">📚 ANALYSIS HISTORY MODULE</div>
+<div class="page-hero-title">Analysis History</div>
+<div class="page-hero-subtitle">
+View, filter, and review previously saved characterization and
+heavy metal detection experiments from a centralized workspace.
+</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
 st.title("Analysis History")
 st.write(

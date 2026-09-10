@@ -5,6 +5,16 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 
+from styles import load_css
+
+st.set_page_config(
+    page_title="Reports and Export",
+    page_icon="📄",
+    layout="wide",
+)
+
+load_css()
+
 try:
 	from core.reporting.characterization_report import (
 		generate_characterization_pdf,
@@ -20,6 +30,21 @@ except ImportError:
 	generate_heavy_metal_pdf = None
 	export_predictions_json = None
 
+
+st.markdown(
+    """
+<div class="page-hero">
+<div class="page-hero-tag">📄 REPORTS & EXPORT MODULE</div>
+<div class="page-hero-title">Reports and Export</div>
+<div class="page-hero-subtitle">
+Generate, download, and manage reports and analysis results from
+completed characterization, heavy metal detection, and explainable
+AI workflows.
+</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
 st.title("Reports and Export")
 st.write("Download reports and analysis results from the completed platform workflows.")
