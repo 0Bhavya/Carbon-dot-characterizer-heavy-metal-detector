@@ -6,7 +6,10 @@ def load_css():
         """
         <style>
 
-        /* MAIN APPLICATION */
+        /* =========================================
+           MAIN APPLICATION
+        ========================================= */
+
         .stApp {
             background: linear-gradient(
                 135deg,
@@ -17,7 +20,10 @@ def load_css():
         }
 
 
-        /* MAIN CONTENT */
+        /* =========================================
+           MAIN CONTENT
+        ========================================= */
+
         .block-container {
             padding-top: 2rem;
             padding-bottom: 3rem;
@@ -25,7 +31,10 @@ def load_css():
         }
 
 
-        /* HEADINGS */
+        /* =========================================
+           HEADINGS
+        ========================================= */
+
         h1 {
             color: #0F172A;
             font-weight: 700;
@@ -43,34 +52,65 @@ def load_css():
         }
 
 
-        /* SIDEBAR */
+        /* =========================================
+           SIDEBAR
+        ========================================= */
+
         section[data-testid="stSidebar"] {
             background: linear-gradient(
                 180deg,
-                #0F172A,
-                #172554
+                #0B1220 0%,
+                #0F172A 45%,
+                #172554 100%
             );
+            border-right: 1px solid rgba(148, 163, 184, 0.18);
         }
+
+
+        section[data-testid="stSidebar"] > div {
+            padding-top: 1.2rem;
+        }
+
 
         section[data-testid="stSidebar"] * {
             color: #E2E8F0;
         }
 
 
-        /* SIDEBAR NAVIGATION */
         section[data-testid="stSidebar"] a {
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin: 3px 6px;
-            transition: 0.2s;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin: 4px 8px;
+            min-height: 42px;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            border-left: 3px solid transparent;
         }
+
 
         section[data-testid="stSidebar"] a:hover {
-            background-color: rgba(20, 184, 166, 0.25);
+            background: rgba(20, 184, 166, 0.16);
+            border-left: 3px solid #14B8A6;
+            transform: translateX(3px);
         }
 
 
-        /* BUTTONS */
+        section[data-testid="stSidebar"] a[aria-current="page"] {
+            background: linear-gradient(
+                90deg,
+                rgba(20, 184, 166, 0.28),
+                rgba(20, 184, 166, 0.08)
+            );
+            border-left: 3px solid #2DD4BF;
+            font-weight: 700;
+            color: white !important;
+        }
+
+
+        /* =========================================
+           BUTTONS
+        ========================================= */
+
         .stButton > button {
             background: linear-gradient(
                 135deg,
@@ -82,8 +122,9 @@ def load_css():
             border-radius: 8px;
             padding: 0.55rem 1.2rem;
             font-weight: 600;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
+
 
         .stButton > button:hover {
             background: linear-gradient(
@@ -92,28 +133,41 @@ def load_css():
                 #0D9488
             );
             transform: translateY(-1px);
-            box-shadow: 0px 4px 12px rgba(20, 184, 166, 0.25);
+            box-shadow:
+                0px 4px 12px
+                rgba(20, 184, 166, 0.25);
         }
 
 
-        /* METRIC CARDS */
+        /* =========================================
+           METRIC CARDS
+        ========================================= */
+
         div[data-testid="stMetric"] {
-            background: white;
+            background: #FFFFFF;
             border: 1px solid #E2E8F0;
             padding: 18px;
             border-radius: 12px;
-            box-shadow: 0px 3px 10px rgba(15, 23, 42, 0.06);
+            box-shadow:
+                0px 3px 10px
+                rgba(15, 23, 42, 0.06);
         }
 
 
-        /* INFO BOXES */
+        /* =========================================
+           INFO BOXES
+        ========================================= */
+
         .stAlert {
             border-radius: 10px;
             border: none;
         }
 
 
-        /* FILE UPLOADER */
+        /* =========================================
+           FILE UPLOADER
+        ========================================= */
+
         [data-testid="stFileUploader"] {
             background: white;
             border-radius: 12px;
@@ -122,13 +176,10 @@ def load_css():
         }
 
 
-        /* SELECT BOX */
-        .stSelectbox > div > div {
-            border-radius: 8px;
-        }
+        /* =========================================
+           DATAFRAME
+        ========================================= */
 
-
-        /* DATAFRAME */
         [data-testid="stDataFrame"] {
             border-radius: 12px;
             overflow: hidden;
@@ -136,7 +187,10 @@ def load_css():
         }
 
 
-        /* HORIZONTAL DIVIDER */
+        /* =========================================
+           DIVIDERS
+        ========================================= */
+
         hr {
             border-color: #CBD5E1;
             margin-top: 2rem;
@@ -144,15 +198,127 @@ def load_css():
         }
 
 
-        /* CHECKBOX */
-        .stCheckbox {
-            padding-top: 5px;
+        /* =========================================
+           EXPANDERS
+        ========================================= */
+
+        .streamlit-expanderHeader {
+            border-radius: 10px;
         }
 
 
-        /* EXPANDERS */
-        .streamlit-expanderHeader {
-            border-radius: 10px;
+        /* =========================================
+           MODULE PAGE HERO
+           Used by Characterization and future pages
+        ========================================= */
+
+        .page-hero {
+            width: 100%;
+            box-sizing: border-box;
+
+            background: linear-gradient(
+                135deg,
+                #0F172A 0%,
+                #1E3A5F 55%,
+                #0F766E 100%
+            );
+
+            padding: 42px 48px;
+
+            border-radius: 20px;
+
+            margin-top: 0;
+            margin-bottom: 32px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(15, 23, 42, 0.20);
+
+            color: #FFFFFF;
+        }
+
+
+        /* HERO TAG */
+
+        .page-hero .page-hero-tag {
+            display: inline-block;
+
+            padding: 7px 16px;
+
+            background:
+                rgba(255, 255, 255, 0.12);
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.22);
+
+            border-radius: 20px;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            letter-spacing: 0.7px;
+
+            margin-bottom: 20px;
+
+            color: #CCFBF1 !important;
+        }
+
+
+        /* HERO TITLE */
+
+        .page-hero .page-hero-title {
+            display: block;
+
+            font-size: 42px;
+            font-weight: 750;
+
+            line-height: 1.2;
+
+            letter-spacing: -1px;
+
+            margin-bottom: 14px;
+
+            color: #FFFFFF !important;
+        }
+
+
+        /* HERO SUBTITLE */
+
+        .page-hero .page-hero-subtitle {
+            display: block;
+
+            font-size: 17px;
+
+            font-weight: 400;
+
+            line-height: 1.7;
+
+            max-width: 850px;
+
+            color: #DCE6F2 !important;
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 768px) {
+
+            .page-hero {
+                padding: 28px 25px;
+                border-radius: 14px;
+            }
+
+            .page-hero .page-hero-title {
+                font-size: 30px;
+            }
+
+            .page-hero .page-hero-subtitle {
+                font-size: 15px;
+            }
+
         }
 
         </style>

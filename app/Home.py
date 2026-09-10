@@ -229,6 +229,77 @@ st.markdown(
         }
     }
 
+    /* About cards */
+    .about-section {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+        margin: 18px 0 12px;
+    }
+
+    .about-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+        min-height: 190px;
+        padding: 22px 20px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .about-card:hover {
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        transform: translateY(-5px);
+    }
+
+    .about-card-header {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .about-card-icon {
+        align-items: center;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        color: #0F172A;
+        display: flex;
+        font-size: 13px;
+        font-weight: 700;
+        height: 34px;
+        justify-content: center;
+        width: 34px;
+    }
+
+    .about-card-title {
+        color: #0F172A;
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin: 0;
+    }
+
+    .about-card-text {
+        color: #64748B;
+        font-size: 14px;
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    @media (max-width: 1100px) {
+        .about-section {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 600px) {
+        .about-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
     /* Getting started guide */
     .getting-started-section {
         display: grid;
@@ -382,8 +453,6 @@ st.write(
 )
 
 
-about_columns = st.columns(4)
-
 about_items = [
     (
         "Carbon Dot Characterization",
@@ -403,11 +472,27 @@ about_items = [
     ),
 ]
 
+about_cards = "".join(
+    f"""
+<div class="about-card">
+    <div class="about-card-header">
+        <div class="about-card-icon">{index}</div>
+        <h3 class="about-card-title">{title}</h3>
+    </div>
+    <p class="about-card-text">{description}</p>
+</div>
+"""
+    for index, (title, description) in enumerate(about_items, start=1)
+)
 
-for column, (title, description) in zip(about_columns, about_items):
-    with column:
-        st.subheader(title)
-        st.write(description)
+st.markdown(
+    f"""
+<div class="about-section">
+{about_cards}
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
 
 # Workflow Section
