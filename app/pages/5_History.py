@@ -1,95 +1,134 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
-from styles import load_css
+from styles import load_css, render_app_shell_header, render_html
 
 st.set_page_config(
-    page_title="Analysis History",
-    page_icon="📚",
+    page_title="History - Carbon Dot Characterizer",
+    page_icon="💧",
     layout="wide",
 )
 
 load_css()
+render_app_shell_header()
 
-st.markdown(
+# Header
+render_html(
     """
-<div class="page-hero">
-<div class="page-hero-tag">📚 ANALYSIS HISTORY MODULE</div>
-<div class="page-hero-title">Analysis History</div>
-<div class="page-hero-subtitle">
-View, filter, and review previously saved characterization and
-heavy metal detection experiments from a centralized workspace.
-</div>
-</div>
-""",
-    unsafe_allow_html=True,
+    <div style="margin-bottom: 1.25rem;">
+        <div class="page-title">Analysis History</div>
+        <div class="page-subtitle">View and review previously saved characterization and heavy metal detection experiments.</div>
+    </div>
+    """
 )
 
-st.title("Analysis History")
-st.write(
-	"View and review previously saved characterization and heavy metal detection experiments."
-)
+# Search & Filter Controls
+filter_col1, filter_col2 = st.columns([1.5, 3])
 
-st.header("Experiment History")
+with filter_col1:
+    module_filter = st.selectbox(
+        "Filter by Module",
+        ["All Modules", "Heavy Metal Detection", "Characterization", "Explainable AI"],
+        index=0,
+    )
 
-# Integration point: fetch experiment history using database CRUD function
-experiment_history = st.session_state.get("experiment_history", [])
-history_df = pd.DataFrame(experiment_history)
+with filter_col2:
+    search_query = st.text_input("Search by Sample Name", placeholder="e.g. River_Water_07...")
 
-expected_columns = [
-	"Experiment ID",
-	"Module",
-	"Experiment Name",
-	"Date",
-	"Status",
-]
-for column in expected_columns:
-	if column not in history_df.columns:
-		history_df[column] = ""
+# Fetch real session experiment history ONLY
+raw_history = st.session_state.get("experiment_history", [])
 
-history_df = history_df[expected_columns]
+history_records = []
+for idx, h in enumerate(raw_history, start=1):
+    status = h.get("Status", "Completed")
+    badge = "completed" if status.lower() == "completed" else "processing"
+    history_records.append(
+        {
+            "ID": f"EXP-{20260900 + idx}",
+            "Sample Name": h.get("Sample Name", "Sample"),
+            "Module": h.get("Module", "General"),
+            "Date": h.get("Date", "Today"),
+            "Status": status,
+            "Badge": badge,
+            "Result": h.get("Result", "Analysis completed and logged to session."),
+        }
+    )
 
-st.subheader("Filter Experiments")
-module_filter = st.selectbox(
-	"Filter by module",
-	["All Modules", "Characterization", "Heavy Metal Detection"],
-)
-
+# Apply filters
+filtered = history_records
 if module_filter != "All Modules":
-	displayed_history_df = history_df[history_df["Module"] == module_filter]
-else:
-	displayed_history_df = history_df
+    filtered = [r for r in filtered if r["Module"] == module_filter or (module_filter == "Heavy Metal Detection" and "Heavy" in r["Module"])]
+if search_query.strip():
+    filtered = [r for r in filtered if search_query.lower() in r["Sample Name"].lower()]
 
-if displayed_history_df.empty:
-	st.info("No saved experiments are available yet.")
-else:
-	st.dataframe(displayed_history_df, use_container_width=True, hide_index=True)
+with st.container(border=True):
+    if filtered:
+        render_html(f'<div class="card-header-title">Completed & In-Progress Experiments ({len(filtered)})</div>')
 
-st.header("Experiment Details")
+        table_rows = "".join(
+            [
+                f"<tr><td style='font-weight: 600; color: #2563EB;'>{r['ID']}</td>"
+                f"<td style='font-weight: 600; color: #0F172A;'>{r['Sample Name']}</td>"
+                f"<td>{r['Module']}</td>"
+                f"<td><span class='status-badge {r['Badge']}'>{r['Status']}</span></td>"
+                f"<td style='color: #64748B;'>{r['Date']}</td>"
+                f"<td style='color: #475569; font-size: 0.8rem;'>{r['Result']}</td></tr>"
+                for r in filtered
+            ]
+        )
 
-if displayed_history_df.empty:
-	st.info("Select an experiment after saved history is available.")
-else:
-	experiment_options = displayed_history_df["Experiment ID"].astype(str).tolist()
-	selected_experiment_id = st.selectbox("Select an experiment", experiment_options)
-	selected_experiment = displayed_history_df[
-		displayed_history_df["Experiment ID"].astype(str) == selected_experiment_id
-	].iloc[0]
-
-	# Integration point: fetch selected experiment details using database CRUD function
-	st.subheader("Experiment Information")
-	st.json(selected_experiment.to_dict())
-
-	st.subheader("Input Dataset Information")
-	st.info("Saved input dataset information will appear here.")
-
-	# Integration point: load saved results
-	st.subheader("Analysis Results")
-	st.info("Saved analysis results will appear here.")
-
-	# Integration point: load generated reports
-	st.subheader("Generated Reports")
-	st.info("Generated reports will appear here.")
-
-	if st.button("Open Experiment Details"):
-		st.info("Experiment details are ready to be loaded.")
+        render_html(
+            f"""
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Experiment ID</th>
+                        <th>Sample Name</th>
+                        <th>Module</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Key Findings / Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {table_rows}
+                </tbody>
+            </table>
+            """
+        )
+    else:
+        render_html(
+            """
+            <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 10px; padding: 2.2rem 1.5rem; text-align: center;">
+                <div style="font-weight: 600; color: #0F172A; font-size: 0.95rem; margin-bottom: 0.35rem;">No saved experiments yet</div>
+                <div style="font-size: 0.82rem; color: #64748B; margin-bottom: 1rem;">
+                    Once you upload and run an analysis in Characterization or Heavy Metal Detection, your results will be logged here.
+                </div>
+            </div>
+            """
+        )
+        if st.button("⚡ Load Benchmark Experiments (Reference Preview)", key="btn_load_demo_to_history"):
+            st.session_state["experiment_history"] = [
+                {
+                    "Sample Name": "River_Water_07",
+                    "Module": "Heavy Metal Detection",
+                    "Status": "Completed",
+                    "Date": "12 Sep 2026",
+                    "Result": "Cadmium: 0.028 mg/L (Warning), Lead/Mercury/Chromium/Arsenic: Safe",
+                },
+                {
+                    "Sample Name": "Water_Sample_12",
+                    "Module": "Characterization",
+                    "Status": "Processing",
+                    "Date": "11 Sep 2026",
+                    "Result": "Optical absorbance scan in progress (Peak: 320 nm)",
+                },
+                {
+                    "Sample Name": "CD_Sample_A3",
+                    "Module": "Explainable AI",
+                    "Status": "Completed",
+                    "Date": "10 Sep 2026",
+                    "Result": "Low Risk (82% Safe) | Key features: pH, Absorbance 320nm",
+                },
+            ]
+            st.rerun()
