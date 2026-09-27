@@ -20,4 +20,4 @@ FEATURE_NAMES = [
 ]
 FEATURE_ORDER = FEATURE_NAMES.copy()
 
-MODEL_ARTIFACT_DIRECTORY = Path("models")
+MODEL_ARTIFACT_DIRECTORY = Path(__file__).resolve().parents[2] / "models"

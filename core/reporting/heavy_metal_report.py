@@ -1,5 +1,6 @@
 """PDF reporting and prediction-data export for heavy metal detection."""
 
+from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from html import escape
 from io import BytesIO
@@ -24,6 +25,8 @@ def _display_value(value: Any) -> str:
 	"""Return a readable value for missing or nested report data."""
 	if value is None:
 		return "N/A"
+	if is_dataclass(value):
+		return _display_value(asdict(value))
 	if isinstance(value, Mapping):
 		return "; ".join(
 			f"{key}: {_display_value(item)}" for key, item in value.items()
@@ -116,6 +119,20 @@ def generate_heavy_metal_pdf(
 	skipped without preventing the report from being generated.
 	"""
 	results = heavy_metal_results or {}
+	identification = results.get("identification")
+	concentration = results.get("concentration")
+	detection_result = {
+		"Detection status": results.get("detection_status", results.get("status")),
+		"Detection confidence": results.get("detection_confidence", results.get("confidence")),
+		"Identified heavy metal": getattr(identification, "metal", None),
+		"Identification confidence": getattr(identification, "confidence", None),
+		"Estimated concentration": getattr(concentration, "value", None),
+		"Concentration uncertainty": getattr(concentration, "uncertainty", None),
+	}
+	xai_summary = {
+		name: explanation
+		for name, explanation in results.get("xai", {}).items()
+	}
 	styles = getSampleStyleSheet()
 	output = BytesIO()
 	document = SimpleDocTemplate(
@@ -135,21 +152,7 @@ def generate_heavy_metal_pdf(
 	story.extend(
 		_section_table(
 			"Detection Result",
-			{
-				"Detection status": _result_value(results, "detection_status", "status"),
-				"Identified heavy metal": _result_value(
-					results, "identified_heavy_metal", "heavy_metal", "metal"
-				),
-				"Prediction confidence": _result_value(
-					results, "prediction_confidence", "confidence"
-				),
-				"Estimated concentration": _result_value(
-					results, "estimated_concentration", "concentration"
-				),
-				"Concentration uncertainty": _result_value(
-					results, "concentration_uncertainty", "uncertainty"
-				),
-			},
+			detection_result,
 			styles,
 		)
 	)
@@ -157,7 +160,7 @@ def generate_heavy_metal_pdf(
 	story.extend(
 		_section_table(
 			"XAI / Explainability Summary",
-			_result_value(results, "xai_summary", "explainability_summary", "explanation"),
+			xai_summary or _result_value(results, "xai_summary", "explainability_summary", "explanation"),
 			styles,
 		)
 	)
@@ -179,6 +182,8 @@ def generate_heavy_metal_pdf(
 
 def _json_safe(value: Any) -> Any:
 	"""Convert common nested result values into JSON-compatible values."""
+	if is_dataclass(value):
+		return _json_safe(asdict(value))
 	if isinstance(value, Mapping):
 		return {str(key): _json_safe(item) for key, item in value.items()}
 	if isinstance(value, (list, tuple, set)):
@@ -195,17 +200,26 @@ def export_predictions_json(
 	"""Export completed prediction and SHAP/XAI data as readable JSON."""
 	predictions = prediction_results or {}
 	explainability = explainability_data or {}
+	identification = predictions.get("identification")
+	concentration = predictions.get("concentration")
+	nested_xai = explainability if any(
+		isinstance(value, Mapping) and "shap_values" in value
+		for value in explainability.values()
+	) else None
 	payload = {
 		"prediction_result": _result_value(predictions, "prediction_result", "result")
 		if any(key in predictions for key in ("prediction_result", "result"))
 		else predictions,
-		"identified_metal": _result_value(
+		"identified_metal": getattr(identification, "metal", _result_value(
 			predictions, "identified_metal", "heavy_metal", "metal"
+		)),
+		"confidence": predictions.get(
+			"detection_confidence",
+			getattr(identification, "confidence", _result_value(predictions, "confidence", "prediction_confidence")),
 		),
-		"confidence": _result_value(predictions, "confidence", "prediction_confidence"),
-		"concentration": _result_value(predictions, "concentration", "estimated_concentration"),
-		"uncertainty": _result_value(predictions, "uncertainty", "concentration_uncertainty"),
-		"shap_values": _result_value(explainability, "shap_values", "shap"),
+		"concentration": getattr(concentration, "value", _result_value(predictions, "concentration", "estimated_concentration")),
+		"uncertainty": getattr(concentration, "uncertainty", _result_value(predictions, "uncertainty", "concentration_uncertainty")),
+		"shap_values": _result_value(explainability, "shap_values", "shap") or nested_xai,
 		"feature_importance": _result_value(explainability, "feature_importance"),
 		"feature_contributions": _result_value(
 			explainability, "feature_contributions", "contributions"

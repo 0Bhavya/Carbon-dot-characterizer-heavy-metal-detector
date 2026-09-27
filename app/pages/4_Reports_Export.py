@@ -1,9 +1,13 @@
 """Streamlit page for report generation and analysis exports."""
 
+import sys
 from io import BytesIO
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from styles import load_css
 
@@ -146,11 +150,14 @@ with xlsx_col:
 st.header("Heavy Metal Detection Report")
 heavy_metal_results = st.session_state.get("heavy_metal_results", {})
 # Integration point: receive completed heavy metal prediction results.
-explainability_data = st.session_state.get("explainability_data", {})
+explainability_data = st.session_state.get(
+	"explainability_data",
+	heavy_metal_results.get("xai", {}) if isinstance(heavy_metal_results, dict) else {},
+)
 # Integration point: receive completed explainability and SHAP data.
 
 if not _result_available(heavy_metal_results):
-	st.info("Heavy metal detection results are not available yet. A placeholder report can still be generated.")
+	st.info("Run Heavy Metal Detection first to generate a report from real results.")
 if not _result_available(explainability_data):
 	st.info("Explainability and SHAP data are not available yet.")
 
@@ -161,12 +168,15 @@ if st.button("Generate Heavy Metal Detection PDF", key="generate_heavy_metal_pdf
 		# Integration point: receive XAI images from the external visualization module.
 		graph_images = st.session_state.get("heavy_metal_graph_images")
 		xai_images = st.session_state.get("xai_images")
-		st.session_state["heavy_metal_pdf"] = generate_heavy_metal_pdf(
-			heavy_metal_results,
-			graph_images=graph_images,
-			xai_images=xai_images,
-		)
-		st.success("Heavy metal detection PDF generated.")
+		if not _result_available(heavy_metal_results):
+			st.error("No completed heavy-metal prediction is available.")
+		else:
+			st.session_state["heavy_metal_pdf"] = generate_heavy_metal_pdf(
+				heavy_metal_results,
+				graph_images=graph_images,
+				xai_images=xai_images,
+			)
+			st.success("Heavy metal detection PDF generated.")
 
 heavy_metal_pdf = st.session_state.get("heavy_metal_pdf")
 if heavy_metal_pdf is not None:
@@ -183,10 +193,12 @@ with prediction_col:
 	if st.button("Prepare Prediction Results JSON", key="prepare_prediction_json"):
 		if export_predictions_json is None:
 			st.error("Prediction export is unavailable.")
+		elif not _result_available(heavy_metal_results):
+			st.error("No completed heavy-metal prediction is available.")
 		else:
 			st.session_state["prediction_json"] = export_predictions_json(
 				heavy_metal_results,
-				{},
+				explainability_data,
 			)
 	prediction_json = st.session_state.get("prediction_json")
 	if prediction_json is not None:
@@ -202,6 +214,8 @@ with xai_col:
 	if st.button("Prepare SHAP/XAI JSON", key="prepare_xai_json"):
 		if export_predictions_json is None:
 			st.error("Explainability export is unavailable.")
+		elif not _result_available(explainability_data):
+			st.error("No completed SHAP explanation is available.")
 		else:
 			st.session_state["xai_json"] = export_predictions_json(
 				{},
