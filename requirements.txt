@@ -4,3 +4,10 @@ numpy
 plotly
 openpyxl
 reportlab
+scipy
+scikit-learn
+xgboost
+shap
+matplotlib
+sqlalchemy
+pytest
