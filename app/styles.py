@@ -142,7 +142,6 @@ def load_css():
             background-color: #FFFFFF !important;
             border-right: 1px solid var(--border-color) !important;
             box-shadow: none !important;
-            width: 250px !important;
         }
 
         section[data-testid="stSidebar"] > div:first-child {
